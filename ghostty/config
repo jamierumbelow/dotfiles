@@ -1,0 +1,10 @@
+shell-integration = zsh
+theme = Monokai Pro
+keybind = cmd+enter=text:git status\r
+keybind = shift+opt+D=text:git diff\r
+keybind = shift+opt+P=text:git pull\r
+keybind = shift+opt+Q=text:git co -b jamie/
+keybind = shift+opt+cmd+P=text:git push\r
+keybind = shift+opt+A=text:git add .\r
+keybind = shift+opt+C=text:git commit -m "
+

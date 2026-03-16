@@ -1,6 +1,7 @@
+# general
+export SSH_AUTH_SOCK=~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock
+export GITHUB_USER=jamierumbelow
+
 # cast
 export CHAIN=480
 export ETH_KEYSTORE_ACCOUNT=jamie-ios-sim
-
-# misc
-export GITHUB_USER=jamierumbelow
