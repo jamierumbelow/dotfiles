@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+source "$(dirname "$0")/framework.sh"
+DOTFILES="$WORKSPACE/repos/dotfiles"
+
+# --- Oh My Zsh ---
+
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    info "Oh My Zsh already installed"
+else
+    info "Installing Oh My Zsh"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
+# --- Mise ---
+
+if command_exists mise; then
+    info "Mise already installed"
+else
+    info "Installing Mise"
+    curl -fsSL https://mise.run | bash
+fi
+
+# --- Symlinks ---
+
+symlink "$DOTFILES/.zshrc"               "$HOME/.zshrc"
+symlink "$DOTFILES/ghostty/config"       "$HOME/.config/ghostty/config"
+symlink "$DOTFILES/scripts/framework.sh" "$HOME/framework.sh"
+
+# --- Done ---
+
+info "Done! Open a new shell to get started."
