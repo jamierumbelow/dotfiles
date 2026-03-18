@@ -1,5 +1,7 @@
 # general
 alias reload="source ~/.zshrc"
+alias kk="claude --dangerously-skip-permissions"
+alias kx="codex -s danger-full-access"
 
 # workspace
 alias ws="cd $WORKSPACE"
