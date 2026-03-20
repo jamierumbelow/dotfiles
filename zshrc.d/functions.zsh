@@ -23,6 +23,7 @@ xx() {
     printf "\033[2m thinking...\033[0m"
     claude -p \
         --no-session-persistence \
+        --model haiku \
         --disallowedTools "Bash Read Write Edit MultiEdit Glob Grep WebSearch WebFetch TodoRead TodoWrite" \
         --append-system-prompt "$system" \
         "$1" > "$tmpfile" 2>/dev/null
