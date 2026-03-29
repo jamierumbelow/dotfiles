@@ -52,7 +52,7 @@ xx() {
 }
 
 # sync every repo in $WORKSPACE/repos with its origin default branch
-pull-default-all() {
+pull-all() {
     emulate -L zsh
     setopt null_glob
 
@@ -113,7 +113,7 @@ pull-default-all() {
         fi
 
         stash_ref=""
-        stash_name="pull-default-all: ${current_branch} -> ${target_branch} $(date +%Y-%m-%dT%H:%M:%S)"
+        stash_name="pull-all: ${current_branch} -> ${target_branch} $(date +%Y-%m-%dT%H:%M:%S)"
 
         if [[ -n "$(git -C "$repo" status --short --untracked-files=all)" ]]; then
             printf "  Stashing local changes on %s\n" "$current_branch"
