@@ -53,7 +53,7 @@ xx() {
 }
 
 # sync every repo in $WORKSPACE/repos with its origin default branch
-pull-default-all() {
+pull-all() {
     emulate -L zsh
     setopt null_glob
 
@@ -114,7 +114,7 @@ pull-default-all() {
         fi
 
         stash_ref=""
-        stash_name="pull-default-all: ${current_branch} -> ${target_branch} $(date +%Y-%m-%dT%H:%M:%S)"
+        stash_name="pull-all: ${current_branch} -> ${target_branch} $(date +%Y-%m-%dT%H:%M:%S)"
 
         if [[ -n "$(git -C "$repo" status --short --untracked-files=all)" ]]; then
             printf "  Stashing local changes on %s\n" "$current_branch"
@@ -200,6 +200,88 @@ pull-default-all() {
     fi
 
     if (( ${#failed} || ${#conflicted} )); then
+        return 1
+    fi
+}
+
+# push every repo in $WORKSPACE/repos to its origin current branch
+push-all() {
+    emulate -L zsh
+    setopt null_glob
+
+    local repos_dir="${WORKSPACE}/repos"
+    local repo repo_name current_branch push_output
+    local git_repo_count=0
+    local -a pushed=()
+    local -a failed=()
+    local -a skipped=()
+
+    if [[ -z "$WORKSPACE" ]]; then
+        echo "WORKSPACE is not set."
+        return 1
+    fi
+
+    if [[ ! -d "$repos_dir" ]]; then
+        printf "Repos directory not found: %s\n" "$repos_dir"
+        return 1
+    fi
+
+    for repo in "$repos_dir"/*(/N); do
+        repo_name="${repo:t}"
+
+        if ! git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            skipped+=("$repo_name (not a git repo)")
+            continue
+        fi
+
+        ((git_repo_count++))
+        printf "\n\033[1;34m%s\033[0m\n" "$repo_name"
+
+        current_branch=$(git -C "$repo" symbolic-ref --quiet --short HEAD 2>/dev/null)
+        if [[ -z "$current_branch" ]]; then
+            printf "  Skipping: detached HEAD.\n"
+            skipped+=("$repo_name (detached HEAD)")
+            continue
+        fi
+
+        if [[ -n "$(git -C "$repo" diff --name-only --diff-filter=U)" ]]; then
+            printf "  Skipping: unresolved merge conflicts.\n"
+            skipped+=("$repo_name (merge conflicts)")
+            continue
+        fi
+
+        push_output=$(git -C "$repo" push origin "$current_branch" 2>&1)
+        if [[ $? -ne 0 ]]; then
+            printf "  Push failed.\n"
+            printf "%s\n" "$push_output"
+            failed+=("$repo_name")
+            continue
+        fi
+
+        printf "  Pushed %s\n" "$current_branch"
+        pushed+=("$repo_name")
+    done
+
+    if (( git_repo_count == 0 )); then
+        printf "No git repos found under %s\n" "$repos_dir"
+        return 1
+    fi
+
+    printf "\n\033[1;32mFinished pushing workspace repos.\033[0m\n"
+
+    if (( ${#pushed} )); then
+        printf "Pushed: %s\n" "${(j:, :)pushed}"
+    fi
+
+    if (( ${#failed} )); then
+        printf "Push failures: %s\n" "${(j:, :)failed}"
+    fi
+
+    if (( ${#skipped} )); then
+        printf "Skipped: %s\n" "${(j:, :)skipped}"
+    fi
+
+    if (( ${#failed} )); then
         return 1
     fi
 }
