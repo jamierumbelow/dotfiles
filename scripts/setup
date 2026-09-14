@@ -26,6 +26,8 @@ fi
 symlink "$DOTFILES/.zshrc"               "$HOME/.zshrc"
 symlink "$DOTFILES/ghostty/config"       "$HOME/.config/ghostty/config"
 symlink "$DOTFILES/scripts/framework.sh" "$HOME/framework.sh"
+symlink "$DOTFILES/hammerspoon/init.lua" "$HOME/.hammerspoon/init.lua"
+symlink "$DOTFILES/hammerspoon/Spoons"   "$HOME/.hammerspoon/Spoons"
 
 # --- Done ---
 
