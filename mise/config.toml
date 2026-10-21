@@ -42,3 +42,4 @@ adopt = true
 "brew-cask:rectangle" = { os = "macos" }
 "brew-cask:reader" = { os = "macos" }
 "brew-cask:mochi" = { os = "macos" }
+"brew-cask:spotify" = { os = "macos" }
