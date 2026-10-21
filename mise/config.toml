@@ -1,0 +1,42 @@
+# Machine setup, applied with `mise bootstrap`. Linked to ~/.config/mise/config.toml.
+#
+# agentfiles and agentfiles-private add their own fragments under
+# ~/.config/mise/conf.d/. Optional modules (e.g. worldcoin) are selected per
+# machine in ~/.config/mise/miserc.local.toml, which is never committed:
+#
+#   env = ["worldcoin"]
+
+[bootstrap.repos]
+"~/.oh-my-zsh" = { url = "https://github.com/ohmyzsh/ohmyzsh.git" }
+"~/workspace/repos/dotfiles" = { url = "git@github.com:jamierumbelow/dotfiles.git" }
+"~/workspace/repos/agentfiles" = { url = "git@github.com:jamierumbelow/agentfiles.git" }
+"~/workspace/repos/agentfiles-private" = { url = "git@github.com:jamierumbelow/agentfiles-private.git" }
+
+[dotfiles]
+"~/.config/mise/config.toml" = "~/workspace/repos/dotfiles/mise/config.toml"
+"~/.config/mise/conf.d/agentfiles" = "~/workspace/repos/agentfiles/mise"
+"~/.config/mise/conf.d/agentfiles-private" = "~/workspace/repos/agentfiles-private/mise"
+"~/.zshrc" = "~/workspace/repos/dotfiles/.zshrc"
+"~/framework.sh" = "~/workspace/repos/dotfiles/scripts/framework.sh"
+"~/.gitconfig" = "~/workspace/repos/dotfiles/git/gitconfig"
+"~/.ssh/config" = "~/workspace/repos/dotfiles/ssh/config"
+"~/.config/ghostty/config" = "~/workspace/repos/dotfiles/ghostty/config"
+"~/.hammerspoon/init.lua" = "~/workspace/repos/dotfiles/hammerspoon/init.lua"
+"~/.hammerspoon/Spoons" = "~/workspace/repos/dotfiles/hammerspoon/Spoons"
+
+# Host packages. mise installs these into the Homebrew prefix itself, so the
+# brew command isn't needed. Existing installs are adopted rather than replaced.
+[bootstrap.brew]
+adopt = true
+
+[bootstrap.packages]
+"brew:libpq" = "latest"
+"brew-cask:visual-studio-code" = { os = "macos" }
+"brew-cask:docker-desktop" = { os = "macos" }
+"brew-cask:tableplus" = { os = "macos" }
+"brew-cask:chatgpt" = { os = "macos" }
+"brew-cask:obsidian" = { os = "macos" }
+"brew-cask:hammerspoon" = { os = "macos" }
+"brew-cask:ghostty" = { os = "macos" }
+"brew-cask:raycast" = { os = "macos" }
+"brew-cask:rectangle" = { os = "macos" }
