@@ -1,37 +1,21 @@
 #!/usr/bin/env bash
+#
+# First run on a new machine: install mise, link its config, and bootstrap.
+# 1Password's SSH agent must be working first, since bootstrap clones the other
+# repos over SSH. After this, run `mise bootstrap` to apply config changes.
 
 source "$(dirname "$0")/framework.sh"
 DOTFILES="$WORKSPACE/repos/dotfiles"
 
-# --- Oh My Zsh ---
-
-if [ -d "$HOME/.oh-my-zsh" ]; then
-    info "Oh My Zsh already installed"
-else
-    info "Installing Oh My Zsh"
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-fi
-
-# --- Mise ---
-
-if command_exists mise; then
+if [ -x "$HOME/.local/bin/mise" ]; then
     info "Mise already installed"
 else
     info "Installing Mise"
-    curl -fsSL https://mise.run | bash
+    curl -fsSL https://mise.run | sh
 fi
 
-# --- Symlinks ---
+symlink "$DOTFILES/mise/config.toml" "$HOME/.config/mise/config.toml"
 
-symlink "$DOTFILES/.zshrc"               "$HOME/.zshrc"
-symlink "$DOTFILES/ghostty/config"       "$HOME/.config/ghostty/config"
-symlink "$DOTFILES/scripts/framework.sh" "$HOME/framework.sh"
-symlink "$DOTFILES/hammerspoon/init.lua" "$HOME/.hammerspoon/init.lua"
-symlink "$DOTFILES/hammerspoon/Spoons"   "$HOME/.hammerspoon/Spoons"
-symlink "$DOTFILES/git/gitconfig"        "$HOME/.gitconfig"
-symlink "$DOTFILES/ssh/config"           "$HOME/.ssh/config"
-chmod 700 "$HOME/.ssh"
-
-# --- Done ---
+"$HOME/.local/bin/mise" bootstrap
 
 info "Done! Open a new shell to get started."
