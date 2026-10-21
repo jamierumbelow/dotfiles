@@ -40,3 +40,5 @@ adopt = true
 "brew-cask:ghostty" = { os = "macos" }
 "brew-cask:raycast" = { os = "macos" }
 "brew-cask:rectangle" = { os = "macos" }
+"brew-cask:reader" = { os = "macos" }
+"brew-cask:mochi" = { os = "macos" }
