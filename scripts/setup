@@ -29,6 +29,8 @@ symlink "$DOTFILES/scripts/framework.sh" "$HOME/framework.sh"
 symlink "$DOTFILES/hammerspoon/init.lua" "$HOME/.hammerspoon/init.lua"
 symlink "$DOTFILES/hammerspoon/Spoons"   "$HOME/.hammerspoon/Spoons"
 symlink "$DOTFILES/git/gitconfig"        "$HOME/.gitconfig"
+symlink "$DOTFILES/ssh/config"           "$HOME/.ssh/config"
+chmod 700 "$HOME/.ssh"
 
 # --- Done ---
 
