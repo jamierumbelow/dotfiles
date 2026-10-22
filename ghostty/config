@@ -8,3 +8,4 @@ keybind = shift+opt+cmd+P=text:git push\r
 keybind = shift+opt+A=text:git add .\r
 keybind = shift+opt+C=text:git commit -m "
 
+keybind = cmd+shift+l=prompt_surface_title
