@@ -43,3 +43,5 @@ adopt = true
 "brew-cask:reader" = { os = "macos" }
 "brew-cask:mochi" = { os = "macos" }
 "brew-cask:spotify" = { os = "macos" }
+"brew-cask:conductor" = { os = "macos" }
+"brew-cask:whatsapp" = { os = "macos" }
