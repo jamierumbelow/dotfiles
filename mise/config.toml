@@ -1,10 +1,10 @@
 # Machine setup, applied with `mise bootstrap`. Linked to ~/.config/mise/config.toml.
 #
 # agentfiles and agentfiles-private add their own fragments under
-# ~/.config/mise/conf.d/. Optional modules (e.g. salp) are selected per
+# ~/.config/mise/conf.d/. Optional modules (e.g. work) are selected per
 # machine in ~/.config/mise/miserc.local.toml, which is never committed:
 #
-#   env = ["salp"]
+#   env = ["work"]
 
 [bootstrap.repos]
 "~/.oh-my-zsh" = { url = "https://github.com/ohmyzsh/ohmyzsh.git" }
