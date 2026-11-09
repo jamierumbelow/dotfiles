@@ -11,6 +11,9 @@ source $WORKSPACE/repos/dotfiles/zshrc.d/env.zsh
 source $WORKSPACE/repos/dotfiles/zshrc.d/functions.zsh
 source $WORKSPACE/repos/dotfiles/zshrc.d/aliases.zsh
 
+# private, work-specific config, if cloned
+for f in $WORKSPACE/repos/dotfiles-private/zshrc.d/*.zsh(N); do source $f; done
+
 eval "$($HOME/.local/bin/mise activate zsh)"
 
 cd $WORKSPACE
