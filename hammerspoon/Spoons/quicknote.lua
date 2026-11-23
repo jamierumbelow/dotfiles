@@ -1,18 +1,42 @@
-local function resolveVaultPath()
-  local candidates = {
+-- Two vaults. The personal one syncs to non-work devices through Obsidian Sync,
+-- so work notes go to the work vault, which stays on the work laptop.
+local VAULT_CANDIDATES = {
+  work = {
+    "/Users/jamierumbelow/workspace/work-vault",
+  },
+  personal = {
     "/Users/james.rumbelow/workspace/vault",
     "/Users/jamierumbelow/workspace/vault",
-  }
-  for _, path in ipairs(candidates) do
-    local mode = hs.fs.attributes(path, "mode")
-    if mode == "directory" then return path end
+  },
+}
+-- Present in the personal vault on a machine that has a work vault. While it
+-- exists, a missing work vault is an error rather than a fallback to the
+-- synced personal vault (worklog-append honours the same file).
+local WORK_VAULT_REQUIRED_MARKER = ".work-vault-required"
+
+-- Resolved on every save, so creating or moving a vault needs no reload.
+local function resolveVaultPath(target)
+  for _, path in ipairs(VAULT_CANDIDATES[target]) do
+    if hs.fs.attributes(path, "mode") == "directory" then return path end
   end
-  hs.printf("[quicknote] no vault directory found; tried: %s", table.concat(candidates, ", "))
   return nil
 end
 
+-- ⌘↩ saves to the work journal when there is a work vault, otherwise to the
+-- personal one; ⌘⇧↩ always saves to the personal journal.
+local function resolveTarget(requested)
+  if requested == "personal" then return "personal" end
+  if resolveVaultPath("work") then return "work" end
+  local personal = resolveVaultPath("personal")
+  if personal and hs.fs.attributes(personal .. "/" .. WORK_VAULT_REQUIRED_MARKER, "mode") then
+    return nil, "No work vault found, and the personal vault is marked "
+      .. WORK_VAULT_REQUIRED_MARKER .. ", so the note was not saved to it. "
+      .. "Use ⌘⇧↩ if this note is personal."
+  end
+  return "personal"
+end
+
 local CONFIG = {
-  vaultPath            = resolveVaultPath(),
   dailyFolder          = "daily",        -- relative to vault; "" for vault root
   pathFormat           = "%Y/%m/%Y-%m-%d", -- note path under dailyFolder, sans .md
   dateFormat           = "%Y-%m-%d",     -- display only (save confirmation)
@@ -41,8 +65,8 @@ local function join(...)
   return table.concat(parts, "/")
 end
 
-local function dailyNotePath()
-  return join(CONFIG.vaultPath, CONFIG.dailyFolder, os.date(CONFIG.pathFormat) .. ".md")
+local function dailyNotePath(vaultPath)
+  return join(vaultPath, CONFIG.dailyFolder, os.date(CONFIG.pathFormat) .. ".md")
 end
 
 local function parentDir(path)
@@ -179,19 +203,25 @@ local function notifyError(msg)
   print("[quicknote] ERROR: " .. msg)
 end
 
-local function commit(text)
+local function commit(text, requestedTarget)
   local entry = buildEntry(text)
   if not entry then
     hs.alert.show("Nothing to save")
     return false
   end
 
-  if not CONFIG.vaultPath then
-    notifyError("Vault not found at any known path; check resolveVaultPath().")
+  local target, targetErr = resolveTarget(requestedTarget)
+  if not target then
+    notifyError(targetErr)
+    return false
+  end
+  local vaultPath = resolveVaultPath(target)
+  if not vaultPath then
+    notifyError("No " .. target .. " vault at any known path; check VAULT_CANDIDATES.")
     return false
   end
 
-  local path = dailyNotePath()
+  local path = dailyNotePath(vaultPath)
   local content = readFile(path)
   if not content then
     if not CONFIG.createIfMissing then
@@ -210,7 +240,7 @@ local function commit(text)
   local ok, werr = writeFileAtomic(path, newContent)
   if not ok then notifyError(werr .. " (" .. path .. ")"); return false end
 
-  hs.alert.show("Saved to " .. os.date(CONFIG.dateFormat), 0.8)
+  hs.alert.show("Saved to " .. target .. " journal, " .. os.date(CONFIG.dateFormat), 0.8)
   return true
 end
 
@@ -241,7 +271,7 @@ end
 ucc:setCallback(function(msg)
   local body = msg.body or {}
   if body.action == "commit" then
-    if commit(body.text or "") then
+    if commit(body.text or "", body.target) then
       hs.settings.set(DRAFT_KEY, "")
       -- The note is already on disk; a failure clearing the box must not keep it open.
       local ok, err = pcall(setTextareaValue, "")
@@ -267,12 +297,16 @@ local HTML = [[
   kbd{background:#33333b;border-radius:4px;padding:1px 5px;font:inherit;}
 </style></head><body>
 <textarea id="t" placeholder="Note for today…" autofocus spellcheck="true"></textarea>
-<div class="hint"><span><kbd>⌘↩</kbd> save</span><span><kbd>esc</kbd> hide (keeps draft)</span></div>
+<div class="hint"><span><kbd>⌘↩</kbd> work <kbd>⌘⇧↩</kbd> personal</span><span><kbd>esc</kbd> hide (keeps draft)</span></div>
 <script>
   const t = document.getElementById('t');
-  const post = (action) => webkit.messageHandlers.quicknote.postMessage({action, text: t.value});
+  const post = (action, target) =>
+    webkit.messageHandlers.quicknote.postMessage({action, target, text: t.value});
   t.addEventListener('keydown', (e) => {
-    if (e.metaKey && e.key === 'Enter') { e.preventDefault(); post('commit'); }
+    if (e.metaKey && e.key === 'Enter') {
+      e.preventDefault();
+      post('commit', e.shiftKey ? 'personal' : 'default');
+    }
     else if (e.key === 'Escape') { e.preventDefault(); post('hide'); }
   });
   t.addEventListener('input', () => post('draft'));
@@ -329,4 +363,5 @@ end
 
 hs.hotkey.bind(CONFIG.hotkey[1], CONFIG.hotkey[2], toggleBox)
 buildBox()
-print("[quicknote] loaded; writing to " .. dailyNotePath())
+print("[quicknote] loaded; work vault: " .. tostring(resolveVaultPath("work"))
+  .. ", personal vault: " .. tostring(resolveVaultPath("personal")))
